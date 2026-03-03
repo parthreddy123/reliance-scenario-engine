@@ -180,6 +180,52 @@ def generate_html():
     padding: 0;
   }}
 
+  /* Password gate */
+  #auth-gate {{
+    position: fixed; inset: 0; z-index: 9999;
+    background: #0E1117;
+    display: flex; align-items: center; justify-content: center;
+  }}
+  #auth-gate.hidden {{ display: none; }}
+  .auth-box {{
+    background: linear-gradient(135deg, #1A1F2E 0%, #151A28 100%);
+    border: 1px solid rgba(0,212,170,0.2);
+    border-radius: 16px;
+    padding: 2.5rem 3rem;
+    text-align: center;
+    max-width: 400px;
+    width: 90%;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.5);
+  }}
+  .auth-box h2 {{
+    font-size: 1.2rem; font-weight: 700; color: #F9FAFB;
+    margin-bottom: 0.3rem; border: none; padding: 0;
+  }}
+  .auth-box .auth-sub {{
+    color: #6B7280; font-size: 0.8rem; margin-bottom: 1.5rem;
+  }}
+  .auth-box input {{
+    width: 100%; padding: 0.7rem 1rem;
+    background: #0E1117; border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px; color: #F9FAFB; font-size: 0.95rem;
+    outline: none; margin-bottom: 1rem;
+  }}
+  .auth-box input:focus {{
+    border-color: #00D4AA;
+    box-shadow: 0 0 0 2px rgba(0,212,170,0.15);
+  }}
+  .auth-box button {{
+    width: 100%; padding: 0.7rem;
+    background: linear-gradient(135deg, #00D4AA 0%, #00B894 100%);
+    border: none; border-radius: 8px; color: #0E1117;
+    font-weight: 700; font-size: 0.9rem; cursor: pointer;
+  }}
+  .auth-box button:hover {{ box-shadow: 0 4px 16px rgba(0,212,170,0.3); }}
+  .auth-error {{
+    color: #EF4444; font-size: 0.8rem; margin-top: 0.8rem; display: none;
+  }}
+  #app-content {{ display: none; }}
+
   .page-header {{
     background: linear-gradient(135deg, #0A0E1A 0%, #111827 60%, #1a1040 100%);
     border-bottom: 1px solid rgba(0,212,170,0.2);
@@ -409,6 +455,18 @@ def generate_html():
 </head>
 <body>
 
+<div id="auth-gate">
+    <div class="auth-box">
+        <h2>Reliance Scenario Engine</h2>
+        <div class="auth-sub">Enter password to access</div>
+        <input type="password" id="auth-pw" placeholder="Password" onkeydown="if(event.key==='Enter')checkPw()">
+        <button onclick="checkPw()">Unlock</button>
+        <div class="auth-error" id="auth-err">Incorrect password</div>
+    </div>
+</div>
+
+<div id="app-content">
+
 <div class="page-header">
     <h1>Reliance Geopolitical Scenario Engine</h1>
     <div class="subtitle">Iran / Middle East Risk Analysis for Oil &amp; Refining &nbsp;|&nbsp; Generated {now}</div>
@@ -432,7 +490,35 @@ def generate_html():
     6M sum: <span>{prob_sum_6m:.2f}</span>
 </div>
 
+</div><!-- end #app-content -->
+
 <script>
+const HASH = '9efb39d1fc755180adbe7fe172f732b0152ac5a8232003b8472ee1cf3deb0060';
+
+async function sha256(msg) {{
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(msg));
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}}
+
+async function checkPw() {{
+    const pw = document.getElementById('auth-pw').value;
+    const hash = await sha256(pw);
+    if (hash === HASH) {{
+        document.getElementById('auth-gate').classList.add('hidden');
+        document.getElementById('app-content').style.display = 'block';
+        sessionStorage.setItem('rse_auth', '1');
+    }} else {{
+        document.getElementById('auth-err').style.display = 'block';
+        document.getElementById('auth-pw').value = '';
+        document.getElementById('auth-pw').focus();
+    }}
+}}
+
+if (sessionStorage.getItem('rse_auth') === '1') {{
+    document.getElementById('auth-gate').classList.add('hidden');
+    document.getElementById('app-content').style.display = 'block';
+}}
+
 function showTab(horizon) {{
     document.querySelectorAll('.horizon-section').forEach(el => el.classList.remove('active'));
     document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
