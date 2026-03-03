@@ -1,0 +1,50 @@
+feeds:
+  # Think Tanks
+  - url: "https://www.atlanticcouncil.org/category/blogs/menasource/feed/"
+    category: think_tank
+    name: "Atlantic Council MENA"
+  - url: "https://www.crisisgroup.org/rss/85"
+    category: think_tank
+    name: "Crisis Group Iran"
+  - url: "https://www.crisisgroup.org/rss/84"
+    category: think_tank
+    name: "Crisis Group Gulf"
+
+  # Wire Services
+  - url: "https://feeds.bbci.co.uk/news/world/middle_east/rss.xml"
+    category: geopolitical
+    name: "BBC Middle East"
+  - url: "https://www.aljazeera.com/xml/rss/all.xml"
+    category: geopolitical
+    name: "Al Jazeera"
+
+  # Oil/Energy
+  - url: "https://oilprice.com/rss/main"
+    category: oil_market
+    name: "OilPrice.com"
+  - url: "https://www.rigzone.com/news/rss/rigzone_latest.aspx"
+    category: oil_market
+    name: "Rigzone"
+  - url: "https://www.eia.gov/rss/todayinenergy.xml"
+    category: oil_market
+    name: "EIA"
+
+  # Google News (targeted queries)
+  - url: "https://news.google.com/rss/search?q=Iran+oil+sanctions+when:7d&hl=en-US&gl=US&ceid=US:en"
+    category: geopolitical
+    name: "GNews Iran Oil"
+  - url: "https://news.google.com/rss/search?q=Strait+of+Hormuz+when:7d&hl=en-US&gl=US&ceid=US:en"
+    category: geopolitical
+    name: "GNews Hormuz"
+  - url: "https://news.google.com/rss/search?q=OPEC+oil+production+when:7d&hl=en-US&gl=US&ceid=US:en"
+    category: oil_market
+    name: "GNews OPEC"
+  - url: "https://news.google.com/rss/search?q=%22Reliance+Industries%22+crude+oil+when:7d&hl=en-IN&gl=IN&ceid=IN:en"
+    category: india_reliance
+    name: "GNews Reliance"
+  - url: "https://news.google.com/rss/search?q=India+crude+oil+import+when:7d&hl=en-IN&gl=IN&ceid=IN:en"
+    category: india_reliance
+    name: "GNews India Crude"
+  - url: "https://news.google.com/rss/search?q=Middle+East+oil+supply+when:7d&hl=en-US&gl=US&ceid=US:en"
+    category: geopolitical
+    name: "GNews ME Oil Supply"

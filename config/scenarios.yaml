@@ -1,0 +1,70 @@
+scenarios:
+  quick_ceasefire:
+    name: "Quick Ceasefire"
+    description: "International pressure forces de-escalation in 2-4 weeks. Hormuz reopens with naval escorts."
+    color: "#10B981"
+    impacts:
+      3m:
+        oil_price: { low: 70, mid: 78, high: 90 }
+        grm: { low: 8, mid: 10, high: 13 }
+        stock: { low: -5, mid: 0, high: 8 }
+      6m:
+        oil_price: { low: 65, mid: 72, high: 80 }
+        grm: { low: 9, mid: 11, high: 14 }
+        stock: { low: -2, mid: 5, high: 12 }
+
+  prolonged_standoff:
+    name: "Prolonged Standoff"
+    description: "Hormuz partially open at 30-40% traffic for 2-4 months. IRGC power vacuum. Sporadic attacks."
+    color: "#F59E0B"
+    impacts:
+      3m:
+        oil_price: { low: 88, mid: 100, high: 115 }
+        grm: { low: 5, mid: 7, high: 10 }
+        stock: { low: -20, mid: -12, high: -5 }
+      6m:
+        oil_price: { low: 80, mid: 90, high: 105 }
+        grm: { low: 7, mid: 9, high: 12 }
+        stock: { low: -15, mid: -5, high: 3 }
+
+  regional_conflagration:
+    name: "Regional Conflagration"
+    description: "Full escalation — Iran mines Hormuz, attacks Gulf infrastructure. Houthis intensify. IEA activates reserves."
+    color: "#EF4444"
+    impacts:
+      3m:
+        oil_price: { low: 115, mid: 135, high: 160 }
+        grm: { low: -2, mid: 3, high: 8 }
+        stock: { low: -35, mid: -25, high: -15 }
+      6m:
+        oil_price: { low: 100, mid: 120, high: 145 }
+        grm: { low: 2, mid: 6, high: 11 }
+        stock: { low: -30, mid: -18, high: -8 }
+
+  regime_collapse:
+    name: "Regime Collapse & Reconstruction"
+    description: "IRGC fractures, Iran enters instability. Hormuz eventually reopens under intl control. Iran 3M bpd goes offline 12+ months."
+    color: "#8B5CF6"
+    impacts:
+      3m:
+        oil_price: { low: 105, mid: 125, high: 150 }
+        grm: { low: 0, mid: 5, high: 10 }
+        stock: { low: -30, mid: -18, high: -10 }
+      6m:
+        oil_price: { low: 85, mid: 95, high: 115 }
+        grm: { low: 10, mid: 13, high: 16 }
+        stock: { low: -10, mid: 2, high: 15 }
+
+  negotiated_settlement:
+    name: "Negotiated Settlement"
+    description: "Back-channel via Oman/China produces grand bargain. Iran accepts nuclear limits. Sanctions eased."
+    color: "#00D4FF"
+    impacts:
+      3m:
+        oil_price: { low: 55, mid: 62, high: 70 }
+        grm: { low: 5, mid: 7, high: 9 }
+        stock: { low: 5, mid: 10, high: 18 }
+      6m:
+        oil_price: { low: 50, mid: 58, high: 65 }
+        grm: { low: 6, mid: 8, high: 10 }
+        stock: { low: 8, mid: 15, high: 25 }
