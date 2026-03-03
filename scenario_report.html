@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reliance Geopolitical Scenario Engine</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background: #0E1117;
+    color: #F9FAFB;
+    line-height: 1.5;
+    padding: 0;
+  }
+
+  .page-header {
+    background: linear-gradient(135deg, #0A0E1A 0%, #111827 60%, #1a1040 100%);
+    border-bottom: 1px solid rgba(0,212,170,0.2);
+    padding: 2rem 3rem;
+    text-align: center;
+  }
+  .page-header h1 {
+    font-size: 1.8rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: #F9FAFB;
+    margin-bottom: 0.3rem;
+  }
+  .page-header .subtitle {
+    color: #6B7280;
+    font-size: 0.85rem;
+  }
+
+  /* Tab nav */
+  .tab-nav {
+    display: flex;
+    justify-content: center;
+    gap: 0;
+    background: #111827;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .tab-btn {
+    padding: 0.8rem 2rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #6B7280;
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .tab-btn:hover { color: #9CA3AF; }
+  .tab-btn.active {
+    color: #00D4AA;
+    border-bottom-color: #00D4AA;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1.5rem 2rem;
+  }
+
+  .horizon-section { display: none; }
+  .horizon-section.active { display: block; }
+
+  .horizon-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #E5E7EB;
+    border-bottom: 2px solid rgba(0,212,170,0.3);
+    padding-bottom: 0.4rem;
+    margin-bottom: 1.2rem;
+  }
+
+  /* KPI row */
+  .kpi-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  .kpi-box {
+    background: linear-gradient(135deg, #1A1F2E 0%, #151A28 100%);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 1.2rem 1.5rem;
+    text-align: center;
+  }
+  .kpi-box:hover {
+    border-color: rgba(0,212,170,0.2);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  }
+  .kpi-label {
+    color: #9CA3AF;
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-weight: 600;
+    margin-bottom: 0.3rem;
+  }
+  .kpi-value {
+    color: #F9FAFB;
+    font-size: 1.7rem;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+  }
+  .kpi-range {
+    color: #6B7280;
+    font-size: 0.72rem;
+    margin-top: 0.2rem;
+  }
+
+  /* Scenario cards */
+  .scenario-card {
+    background: linear-gradient(135deg, #1A1F2E 0%, #151A28 100%);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px;
+    padding: 1.3rem 1.5rem;
+    margin-bottom: 1rem;
+    transition: border-color 0.2s;
+  }
+  .scenario-card:hover {
+    border-color: rgba(255,255,255,0.12);
+  }
+  .scenario-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+  }
+  .scenario-name {
+    font-weight: 700;
+    font-size: 1.1rem;
+  }
+  .scenario-prob {
+    font-weight: 800;
+    font-size: 1.25rem;
+    color: #F9FAFB;
+  }
+  .prob-bar-track {
+    background: rgba(255,255,255,0.04);
+    border-radius: 6px;
+    height: 8px;
+    overflow: hidden;
+    margin-bottom: 0.7rem;
+  }
+  .prob-bar-fill {
+    height: 100%;
+    border-radius: 6px;
+    transition: width 0.5s ease;
+  }
+  .scenario-desc {
+    color: #6B7280;
+    font-size: 0.82rem;
+    margin-bottom: 0.8rem;
+  }
+  .scenario-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  /* Articles column */
+  .scenario-articles {
+    min-height: 60px;
+  }
+  .article-row {
+    padding: 0.3rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    font-size: 0.82rem;
+    line-height: 1.4;
+  }
+  .signal {
+    font-size: 0.7rem;
+    font-weight: 600;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+  }
+  .art-source {
+    color: #9CA3AF;
+  }
+  .art-title {
+    color: #E5E7EB;
+  }
+  .more-articles {
+    color: #6B7280;
+    font-size: 0.75rem;
+    padding-top: 0.3rem;
+  }
+
+  /* Impact column */
+  .scenario-impact {
+    background: rgba(255,255,255,0.02);
+    border-radius: 8px;
+    padding: 0.8rem;
+  }
+  .impact-main {
+    color: #9CA3AF;
+    font-size: 0.82rem;
+    margin-bottom: 0.5rem;
+  }
+  .impact-main strong {
+    color: #F9FAFB;
+  }
+  .impact-range {
+    color: #6B7280;
+    font-size: 0.72rem;
+  }
+  .impact-conf {
+    color: #6B7280;
+    font-size: 0.72rem;
+    margin-top: 0.4rem;
+  }
+
+  /* Footer */
+  .page-footer {
+    text-align: center;
+    color: #4B5563;
+    font-size: 0.72rem;
+    padding: 1.5rem 2rem;
+    border-top: 1px solid rgba(255,255,255,0.04);
+    margin-top: 2rem;
+  }
+  .page-footer span { color: #6B7280; }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .page-header { padding: 1.2rem 1rem; }
+    .page-header h1 { font-size: 1.3rem; }
+    .container { padding: 1rem; }
+    .kpi-row { grid-template-columns: 1fr; gap: 0.6rem; }
+    .kpi-value { font-size: 1.3rem; }
+    .scenario-body { grid-template-columns: 1fr; }
+    .scenario-card { padding: 1rem; }
+    .tab-btn { padding: 0.6rem 1.2rem; font-size: 0.8rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+    <h1>Reliance Geopolitical Scenario Engine</h1>
+    <div class="subtitle">Iran / Middle East Risk Analysis for Oil &amp; Refining &nbsp;|&nbsp; Generated 2026-03-04 04:52</div>
+</div>
+
+<div class="tab-nav">
+    <button class="tab-btn active" onclick="showTab('3m')">3-Month Horizon</button>
+    <button class="tab-btn" onclick="showTab('6m')">6-Month Horizon</button>
+</div>
+
+<div class="container">
+    
+    <div class="horizon-section active" id="horizon-3m">
+        <h2 class="horizon-title">3-Month Horizon</h2>
+
+        <div class="kpi-row">
+            <div class="kpi-box">
+                <div class="kpi-label">EXPECTED OIL PRICE</div>
+                <div class="kpi-value">$100.0/bbl</div>
+                <div class="kpi-range">range: $55 – $160</div>
+            </div>
+            <div class="kpi-box">
+                <div class="kpi-label">EXPECTED GRM</div>
+                <div class="kpi-value">$6.3/bbl</div>
+                <div class="kpi-range">range: $-2 – $13</div>
+            </div>
+            <div class="kpi-box">
+                <div class="kpi-label">EXPECTED STOCK IMPACT</div>
+                <div class="kpi-value">-9.2%</div>
+                <div class="kpi-range">range: -35% to +18%</div>
+            </div>
+        </div>
+
+        
+        <div class="scenario-card" style="border-left: 4px solid #F59E0B;">
+            <div class="scenario-header">
+                <span class="scenario-name" style="color:#F59E0B;">Prolonged Standoff</span>
+                <span class="scenario-prob">28%</span>
+            </div>
+            <div class="prob-bar-track">
+                <div class="prob-bar-fill" style="width:27%; background:#F59E0B;"></div>
+            </div>
+            <div class="scenario-desc">Hormuz partially open at 30-40% traffic for 2-4 months. IRGC power vacuum. Sporadic attacks.</div>
+            <div class="scenario-body">
+                <div class="scenario-articles">
+                    
+            <div class="article-row">
+                <span class="signal" style="color:#10B981">[+0.80]</span>
+                <span class="art-source">BBC Middle East:</span>
+                <span class="art-title">Six US soldiers killed in Iranian strike on Kuwait base</span>
+            </div>
+            <div class="article-row">
+                <span class="signal" style="color:#10B981">[+0.80]</span>
+                <span class="art-source">OilPrice.com:</span>
+                <span class="art-title">The 24-Hour Energy Shock the World Wasn’t Ready For</span>
+            </div>
+            <div class="article-row">
+                <span class="signal" style="color:#10B981">[+0.75]</span>
+                <span class="art-source">Crisis Group Iran:</span>
+                <span class="art-title">Special Episode: Regime Change or Regional War? U.S. and Israel Kill Iran’s Supreme L</span>
+            </div>
+            <div class="article-row">
+                <span class="signal" style="color:#10B981">[+0.70]</span>
+                <span class="art-source">Crisis Group Gulf:</span>
+                <span class="art-title">The Gulf Countries Face a Litmus Test</span>
+            </div><div class="more-articles">+2 more articles</div>
+                </div>
+                <div class="scenario-impact">
+                    <div class="impact-main">
+                        <strong>If this scenario:</strong>
+                        Oil $100/bbl &nbsp;|&nbsp;
+                        GRM $7/bbl &nbsp;|&nbsp;
+                        Stock -12%
+                    </div>
+                    <div class="impact-range">
+                        Oil: $88 – $115 &nbsp;|&nbsp;
+                        GRM: $5 – $10 &nbsp;|&nbsp;
+                        Stock: -20% to -5%
+                    </div>
+                    <div class="impact-conf">
+                        Confidence: low &nbsp;|&nbsp; 2 articles
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="scenario-card" style="border-left: 4px solid #00D4FF;">
+            <div class="scenario-header">
+                <span class="scenario-name" style="color:#00D4FF;">Negotiated Settlement</span>
+                <span class="scenario-prob">21%</span>
+            </div>
+            <div class="prob-bar-track">
+                <div class="prob-bar-fill" style="width:20%; background:#00D4FF;"></div>
+            </div>
+            <div class="scenario-desc">Back-channel via Oman/China produces grand bargain. Iran accepts nuclear limits. Sanctions eased.</div>
+            <div class="scenario-body">
+                <div class="scenario-articles">
+                    
+            <div class="article-row">
+                <span class="signal" style="color:#10B981">[+0.80]</span>
+                <span class="art-source">Crisis Group Gulf:</span>
+                <span class="art-title">A Time for Talks: Toward Dialogue between the  Gulf Arab States and Iran</span>
+            </div>
+            <div class="article-row">
+                <span class="signal" style="color:#10B981">[+0.80]</span>
+                <span class="art-source">Crisis Group Iran:</span>
+                <span class="art-title">Iran in Crisis: Time for a Change from Within</span>
+            </div>
+            <div class="article-row">
+                <span class="signal" style="color:#10B981">[+0.75]</span>
+                <span class="art-source">Crisis Group Gulf:</span>
+                <span class="art-title">از تقابل تا تعامل: رویکرد عربستان و امارات در برابر ایران</span>
+            </div>
+            <div class="article-row">
+                <span class="signal" style="color:#10B981">[+0.70]</span>
+                <span class="art-source">Crisis Group Gulf:</span>
+                <span class="art-title">UN stamps Trump plan, Gaza in Limbo, Saudi Crown Prince in Washington</span>
+            </div><div class="more-articles">+2 more articles</div>
+                </div>
+                <div class="scenario-impact">
+                    <div class="impact-main">
+                        <strong>If this scenario:</strong>
+                        Oil $62/bbl &nbsp;|&nbsp;
+                        GRM $7/bbl &nbsp;|&nbsp;
+                        Stock +10%
+                    </div>
+                    <div class="impact-range">
+                        Oil: $55 – $70 &nbsp;|&nbsp;
+                        GRM: $5 – $9 &nbsp;|&nbsp;
+                        Stock: +5% to +18%
+                    </div>
+                    <div class="impact-conf">
+                        Confidence: low &nbsp;|&nbsp; 2 articles
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="scenario-card" style="border-left: 4px solid #EF4444;">
+            <div class="scenario-header">
+                <span class="scenario-name" style="color:#EF4444;">Regional Conflagration</span>
+                <span class="scenario-prob">19%</span>
+            </div>
+            <div class="prob-bar-track">
+                <div class="prob-bar-fill" style="width:18%; background:#EF4444;"></div>
+            </div>
+            <div class="scenario-desc">Full escalation â€” Iran mines Hormuz, attacks Gulf infrastructure. Houthis intensify. IEA activates reserves.</div>
+            <div class="scenario-body">
+                <div class="scenario-articles">
+                    
+            <div class="article-row">
+                <span class="signal" style="color:#10B981">[+0.80]</span>
+                <span class="art-source">Crisis Group Iran:</span>
+                <span class="art-title">Trump’s Iran Gamble</span>
+            </div>
+            <div class="article-row">
+                <span class="signal" style="color:#10B981">[+0.70]</span>
+                <span class="art-source">Crisis Group Iran:</span>
+                <span class="art-title">The U.S. and Iran Can Still Avoid a War</span>
+            </div>
+            <div class="article-row">
+                <span class="signal" style="color:#10B981">[+0.70]</span>
+                <span class="art-source">Crisis Group Iran:</span>
+                <span class="art-title">Special Episode: Regime Change or Regional War? U.S. and Israel Kill Iran’s Supreme L</span>
+            </div>
+            <div class="article-row">
+                <span class="signal" style="color:#10B981">[+0.60]</span>
+                <span class="art-source">BBC Middle East:</span>
+                <span class="art-title">Six US soldiers killed in Iranian strike on Kuwait base</span>
+            </div><div class="more-articles">+2 more articles</div>
+                </div>
+                <div class="scenario-impact">
+                    <div class="impact-main">
+                        <strong>If this scenario:</strong>
+                        Oil $135/bbl &nbsp;|&nbsp;
+                        GRM $3/bbl &nbsp;|&nbsp;
+                        Stock -25%
+                    </div>
+                    <div class="impact-range">
+                        Oil: $115 – $160 &nbsp;|&nbsp;
+                        GRM: $-2 – $8 &nbsp;|&nbsp;
+                        Stock: -35% to -15%
+                    </div>
+                    <div class="impact-conf">
+                        Confidence: low &nbsp;|&nbsp; 2 articles
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="scenario-card" style="border-left: 4px solid #8B5CF6;">
+            <div class="scenario-header">
+                <span class="scenario-name" style="color:#8B5CF6;">Regime Collapse & Reconstruction</span>
+                <span class="scenario-prob">18%</span>
+            </div>
+            <div class="prob-bar-track">
+                <div class="prob-bar-fill" style="width:17%; background:#8B5CF6;"></div>
+            </div>
+            <div class="scenario-desc">IRGC fractures, Iran enters instability. Hormuz eventually reopens under intl control. Iran 3M bpd goes offline 12+ months.</div>
+            <div class="scenario-body">
+                <div class="scenario-articles">
+                    
+            <div class="article-row">
+                <span class="signal" style="color:#10B981">[+0.80]</span>
+                <span class="art-source">Crisis Group Iran:</span>
+                <span class="art-title">Special Episode: Regime Change or Regional War? U.S. and Israel Kill Iran’s Supreme L</span>
+            </div>
+            <div class="article-row">
+                <span class="signal" style="color:#10B981">[+0.70]</span>
+                <span class="art-source">Crisis Group Iran:</span>
+                <span class="art-title">Iran in Crisis: Time for a Change from Within</span>
+            </div>
+            <div class="article-row">
+                <span class="signal" style="color:#10B981">[+0.60]</span>
+                <span class="art-source">Crisis Group Iran:</span>
+                <span class="art-title">What Next for Iran?</span>
+            </div>
+            <div class="article-row">
+                <span class="signal" style="color:#6B7280">[+0.20]</span>
+                <span class="art-source">Crisis Group Iran:</span>
+                <span class="art-title">Trump’s Iran Gamble</span>
+            </div><div class="more-articles">+2 more articles</div>
+                </div>
+                <div class="scenario-impact">
+                    <div class="impact-main">
+                        <strong>If this scenario:</strong>
+                        Oil $125/bbl &nbsp;|&nbsp;
+                        GRM $5/bbl &nbsp;|&nbsp;
+                        Stock -18%
+                    </div>
+                    <div class="impact-range">
+                        Oil: $105 – $150 &nbsp;|&nbsp;
+                        GRM: $0 – $10 &nbsp;|&nbsp;
+                        Stock: -30% to -10%
+                    </div>
+                    <div class="impact-conf">
+                        Confidence: low &nbsp;|&nbsp; 2 articles
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="scenario-card" style="border-left: 4px solid #10B981;">
+            <div class="scenario-header">
+                <span class="scenario-name" style="color:#10B981;">Quick Ceasefire</span>
+                <span class="scenario-prob">15%</span>
+            </div>
+            <div class="prob-bar-track">
+                <div class="prob-bar-fill" style="width:15%; background:#10B981;"></div>
+            </div>
+            <div class="scenario-desc">International pressure forces de-escalation in 2-4 weeks. Hormuz reopens with naval escorts.</div>
+            <div class="scenario-body">
+                <div class="scenario-articles">
+                    
+            <div class="article-row">
+                <span class="signal" style="color:#10B981">[+0.60]</span>
+                <span class="art-source">Crisis Group Gulf:</span>
+                <span class="art-title">UN stamps Trump plan, Gaza in Limbo, Saudi Crown Prince in Washington</span>
+            </div>
+            <div class="article-row">
+                <span class="signal" style="color:#F59E0B">[+0.35]</span>
+                <span class="art-source">GNews India Crude:</span>
+                <span class="art-title">45 days crude oil stock ready - newspress.co.in</span>
+            </div>
+            <div class="article-row">
+                <span class="signal" style="color:#F59E0B">[+0.30]</span>
+                <span class="art-source">Crisis Group Gulf:</span>
+                <span class="art-title">از تقابل تا تعامل: رویکرد عربستان و امارات در برابر ایران</span>
+            </div>
+            <div class="article-row">
+                <span class="signal" style="color:#F59E0B">[+0.30]</span>
+                <span class="art-source">Crisis Group Gulf:</span>
+                <span class="art-title">A Time for Talks: Toward Dialogue between the  Gulf Arab States and Iran</span>
+            </div><div class="more-articles">+2 more articles</div>
+                </div>
+                <div class="scenario-impact">
+                    <div class="impact-main">
+                        <strong>If this scenario:</strong>
+                        Oil $78/bbl &nbsp;|&nbsp;
+                        GRM $10/bbl &nbsp;|&nbsp;
+                        Stock 0%
+                    </div>
+                    <div class="impact-range">
+                        Oil: $70 – $90 &nbsp;|&nbsp;
+                        GRM: $8 – $13 &nbsp;|&nbsp;
+                        Stock: -5% to +8%
+                    </div>
+                    <div class="impact-conf">
+                        Confidence: low &nbsp;|&nbsp; 2 articles
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="horizon-section" id="horizon-6m">
+        <h2 class="horizon-title">6-Month Horizon</h2>
+
+        <div class="kpi-row">
+            <div class="kpi-box">
+                <div class="kpi-label">EXPECTED OIL PRICE</div>
+                <div class="kpi-value">$87.3/bbl</div>
+                <div class="kpi-range">range: $50 – $145</div>
+            </div>
+            <div class="kpi-box">
+                <div class="kpi-label">EXPECTED GRM</div>
+                <div class="kpi-value">$9.2/bbl</div>
+                <div class="kpi-range">range: $2 – $16</div>
+            </div>
+            <div class="kpi-box">
+                <div class="kpi-label">EXPECTED STOCK IMPACT</div>
+                <div class="kpi-value">-0.6%</div>
+                <div class="kpi-range">range: -30% to +25%</div>
+            </div>
+        </div>
+
+        
+        <div class="scenario-card" style="border-left: 4px solid #F59E0B;">
+            <div class="scenario-header">
+                <span class="scenario-name" style="color:#F59E0B;">Prolonged Standoff</span>
+                <span class="scenario-prob">28%</span>
+            </div>
+            <div class="prob-bar-track">
+                <div class="prob-bar-fill" style="width:27%; background:#F59E0B;"></div>
+            </div>
+            <div class="scenario-desc">Hormuz partially open at 30-40% traffic for 2-4 months. IRGC power vacuum. Sporadic attacks.</div>
+            <div class="scenario-body">
+                <div class="scenario-articles">
+                    
+            <div class="article-row">
+                <span class="signal" style="color:#10B981">[+0.80]</span>
+                <span class="art-source">BBC Middle East:</span>
+                <span class="art-title">Six US soldiers killed in Iranian strike on Kuwait base</span>
+            </div>
+            <div class="article-row">
+                <span class="signal" style="color:#10B981">[+0.80]</span>
+                <span class="art-source">OilPrice.com:</span>
+                <span class="art-title">The 24-Hour Energy Shock the World Wasn’t Ready For</span>
+            </div>
+            <div class="article-row">
+                <span class="signal" style="color:#10B981">[+0.75]</span>
+                <span class="art-source">Crisis Group Iran:</span>
+                <span class="art-title">Special Episode: Regime Change or Regional War? U.S. and Israel Kill Iran’s Supreme L</span>
+            </div>
+            <div class="article-row">
+                <span class="signal" style="color:#10B981">[+0.70]</span>
+                <span class="art-source">Crisis Group Gulf:</span>
+                <span class="art-title">The Gulf Countries Face a Litmus Test</span>
+            </div><div class="more-articles">+2 more articles</div>
+                </div>
+                <div class="scenario-impact">
+                    <div class="impact-main">
+                        <strong>If this scenario:</strong>
+                        Oil $90/bbl &nbsp;|&nbsp;
+                        GRM $9/bbl &nbsp;|&nbsp;
+                        Stock -5%
+                    </div>
+                    <div class="impact-range">
+                        Oil: $80 – $105 &nbsp;|&nbsp;
+                        GRM: $7 – $12 &nbsp;|&nbsp;
+                        Stock: -15% to +3%
+                    </div>
+                    <div class="impact-conf">
+                        Confidence: low &nbsp;|&nbsp; 2 articles
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="scenario-card" style="border-left: 4px solid #00D4FF;">
+            <div class="scenario-header">
+                <span class="scenario-name" style="color:#00D4FF;">Negotiated Settlement</span>
+                <span class="scenario-prob">21%</span>
+            </div>
+            <div class="prob-bar-track">
+                <div class="prob-bar-fill" style="width:20%; background:#00D4FF;"></div>
+            </div>
+            <div class="scenario-desc">Back-channel via Oman/China produces grand bargain. Iran accepts nuclear limits. Sanctions eased.</div>
+            <div class="scenario-body">
+                <div class="scenario-articles">
+                    
+            <div class="article-row">
+                <span class="signal" style="color:#10B981">[+0.80]</span>
+                <span class="art-source">Crisis Group Gulf:</span>
+                <span class="art-title">A Time for Talks: Toward Dialogue between the  Gulf Arab States and Iran</span>
+            </div>
+            <div class="article-row">
+                <span class="signal" style="color:#10B981">[+0.80]</span>
+                <span class="art-source">Crisis Group Iran:</span>
+                <span class="art-title">Iran in Crisis: Time for a Change from Within</span>
+            </div>
+            <div class="article-row">
+                <span class="signal" style="color:#10B981">[+0.75]</span>
+                <span class="art-source">Crisis Group Gulf:</span>
+                <span class="art-title">از تقابل تا تعامل: رویکرد عربستان و امارات در برابر ایران</span>
+            </div>
+            <div class="article-row">
+                <span class="signal" style="color:#10B981">[+0.70]</span>
+                <span class="art-source">Crisis Group Gulf:</span>
+                <span class="art-title">UN stamps Trump plan, Gaza in Limbo, Saudi Crown Prince in Washington</span>
+            </div><div class="more-articles">+2 more articles</div>
+                </div>
+                <div class="scenario-impact">
+                    <div class="impact-main">
+                        <strong>If this scenario:</strong>
+                        Oil $58/bbl &nbsp;|&nbsp;
+                        GRM $8/bbl &nbsp;|&nbsp;
+                        Stock +15%
+                    </div>
+                    <div class="impact-range">
+                        Oil: $50 – $65 &nbsp;|&nbsp;
+                        GRM: $6 – $10 &nbsp;|&nbsp;
+                        Stock: +8% to +25%
+                    </div>
+                    <div class="impact-conf">
+                        Confidence: low &nbsp;|&nbsp; 2 articles
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="scenario-card" style="border-left: 4px solid #EF4444;">
+            <div class="scenario-header">
+                <span class="scenario-name" style="color:#EF4444;">Regional Conflagration</span>
+                <span class="scenario-prob">19%</span>
+            </div>
+            <div class="prob-bar-track">
+                <div class="prob-bar-fill" style="width:18%; background:#EF4444;"></div>
+            </div>
+            <div class="scenario-desc">Full escalation â€” Iran mines Hormuz, attacks Gulf infrastructure. Houthis intensify. IEA activates reserves.</div>
+            <div class="scenario-body">
+                <div class="scenario-articles">
+                    
+            <div class="article-row">
+                <span class="signal" style="color:#10B981">[+0.80]</span>
+                <span class="art-source">Crisis Group Iran:</span>
+                <span class="art-title">Trump’s Iran Gamble</span>
+            </div>
+            <div class="article-row">
+                <span class="signal" style="color:#10B981">[+0.70]</span>
+                <span class="art-source">Crisis Group Iran:</span>
+                <span class="art-title">The U.S. and Iran Can Still Avoid a War</span>
+            </div>
+            <div class="article-row">
+                <span class="signal" style="color:#10B981">[+0.70]</span>
+                <span class="art-source">Crisis Group Iran:</span>
+                <span class="art-title">Special Episode: Regime Change or Regional War? U.S. and Israel Kill Iran’s Supreme L</span>
+            </div>
+            <div class="article-row">
+                <span class="signal" style="color:#10B981">[+0.60]</span>
+                <span class="art-source">BBC Middle East:</span>
+                <span class="art-title">Six US soldiers killed in Iranian strike on Kuwait base</span>
+            </div><div class="more-articles">+2 more articles</div>
+                </div>
+                <div class="scenario-impact">
+                    <div class="impact-main">
+                        <strong>If this scenario:</strong>
+                        Oil $120/bbl &nbsp;|&nbsp;
+                        GRM $6/bbl &nbsp;|&nbsp;
+                        Stock -18%
+                    </div>
+                    <div class="impact-range">
+                        Oil: $100 – $145 &nbsp;|&nbsp;
+                        GRM: $2 – $11 &nbsp;|&nbsp;
+                        Stock: -30% to -8%
+                    </div>
+                    <div class="impact-conf">
+                        Confidence: low &nbsp;|&nbsp; 2 articles
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="scenario-card" style="border-left: 4px solid #8B5CF6;">
+            <div class="scenario-header">
+                <span class="scenario-name" style="color:#8B5CF6;">Regime Collapse & Reconstruction</span>
+                <span class="scenario-prob">18%</span>
+            </div>
+            <div class="prob-bar-track">
+                <div class="prob-bar-fill" style="width:17%; background:#8B5CF6;"></div>
+            </div>
+            <div class="scenario-desc">IRGC fractures, Iran enters instability. Hormuz eventually reopens under intl control. Iran 3M bpd goes offline 12+ months.</div>
+            <div class="scenario-body">
+                <div class="scenario-articles">
+                    
+            <div class="article-row">
+                <span class="signal" style="color:#10B981">[+0.80]</span>
+                <span class="art-source">Crisis Group Iran:</span>
+                <span class="art-title">Special Episode: Regime Change or Regional War? U.S. and Israel Kill Iran’s Supreme L</span>
+            </div>
+            <div class="article-row">
+                <span class="signal" style="color:#10B981">[+0.70]</span>
+                <span class="art-source">Crisis Group Iran:</span>
+                <span class="art-title">Iran in Crisis: Time for a Change from Within</span>
+            </div>
+            <div class="article-row">
+                <span class="signal" style="color:#10B981">[+0.60]</span>
+                <span class="art-source">Crisis Group Iran:</span>
+                <span class="art-title">What Next for Iran?</span>
+            </div>
+            <div class="article-row">
+                <span class="signal" style="color:#6B7280">[+0.20]</span>
+                <span class="art-source">Crisis Group Iran:</span>
+                <span class="art-title">Trump’s Iran Gamble</span>
+            </div><div class="more-articles">+2 more articles</div>
+                </div>
+                <div class="scenario-impact">
+                    <div class="impact-main">
+                        <strong>If this scenario:</strong>
+                        Oil $95/bbl &nbsp;|&nbsp;
+                        GRM $13/bbl &nbsp;|&nbsp;
+                        Stock +2%
+                    </div>
+                    <div class="impact-range">
+                        Oil: $85 – $115 &nbsp;|&nbsp;
+                        GRM: $10 – $16 &nbsp;|&nbsp;
+                        Stock: -10% to +15%
+                    </div>
+                    <div class="impact-conf">
+                        Confidence: low &nbsp;|&nbsp; 2 articles
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="scenario-card" style="border-left: 4px solid #10B981;">
+            <div class="scenario-header">
+                <span class="scenario-name" style="color:#10B981;">Quick Ceasefire</span>
+                <span class="scenario-prob">15%</span>
+            </div>
+            <div class="prob-bar-track">
+                <div class="prob-bar-fill" style="width:15%; background:#10B981;"></div>
+            </div>
+            <div class="scenario-desc">International pressure forces de-escalation in 2-4 weeks. Hormuz reopens with naval escorts.</div>
+            <div class="scenario-body">
+                <div class="scenario-articles">
+                    
+            <div class="article-row">
+                <span class="signal" style="color:#10B981">[+0.60]</span>
+                <span class="art-source">Crisis Group Gulf:</span>
+                <span class="art-title">UN stamps Trump plan, Gaza in Limbo, Saudi Crown Prince in Washington</span>
+            </div>
+            <div class="article-row">
+                <span class="signal" style="color:#F59E0B">[+0.35]</span>
+                <span class="art-source">GNews India Crude:</span>
+                <span class="art-title">45 days crude oil stock ready - newspress.co.in</span>
+            </div>
+            <div class="article-row">
+                <span class="signal" style="color:#F59E0B">[+0.30]</span>
+                <span class="art-source">Crisis Group Gulf:</span>
+                <span class="art-title">از تقابل تا تعامل: رویکرد عربستان و امارات در برابر ایران</span>
+            </div>
+            <div class="article-row">
+                <span class="signal" style="color:#F59E0B">[+0.30]</span>
+                <span class="art-source">Crisis Group Gulf:</span>
+                <span class="art-title">A Time for Talks: Toward Dialogue between the  Gulf Arab States and Iran</span>
+            </div><div class="more-articles">+2 more articles</div>
+                </div>
+                <div class="scenario-impact">
+                    <div class="impact-main">
+                        <strong>If this scenario:</strong>
+                        Oil $72/bbl &nbsp;|&nbsp;
+                        GRM $11/bbl &nbsp;|&nbsp;
+                        Stock +5%
+                    </div>
+                    <div class="impact-range">
+                        Oil: $65 – $80 &nbsp;|&nbsp;
+                        GRM: $9 – $14 &nbsp;|&nbsp;
+                        Stock: -2% to +12%
+                    </div>
+                    <div class="impact-conf">
+                        Confidence: low &nbsp;|&nbsp; 2 articles
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-footer">
+    Last scraped: <span>2026-03-04T00:39</span> &nbsp;|&nbsp;
+    Weights computed: <span>2026-03-04 00:41</span> &nbsp;|&nbsp;
+    <span>721</span> articles &nbsp;|&nbsp;
+    3M sum: <span>1.00</span> &nbsp;|&nbsp;
+    6M sum: <span>1.00</span>
+</div>
+
+<script>
+function showTab(horizon) {
+    document.querySelectorAll('.horizon-section').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+    document.getElementById('horizon-' + horizon).classList.add('active');
+    event.target.classList.add('active');
+}
+</script>
+</body>
+</html>
